@@ -1,0 +1,4 @@
+name = mymodule
+2. description = custom module test
+3. version = 7.x-1.x-dev
+4. core = 7.x

@@ -1,0 +1,147 @@
+<?php
+ /**
+  * @file
+  * my_database module
+  */
+  
+
+/**
+  * Implements hook_menu(). 
+  */
+  
+function my_database_menu() {
+  $items = array();
+  $items['delete'] = array(
+    'title' => 'Test DB',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('my_database_form'),
+    'access callback' => TRUE,
+    'type' => MENU_NORMAL_ITEM,
+  );
+  $items['showselect'] = array(
+    'title' => 'Select test',
+    'page callback' => 'my_database_showselect',
+    'access callback' => TRUE,
+    'type' => MENU_NORMAL_ITEM,
+    'menu_name' => 'navigation',
+  );  
+  return $items;
+}
+
+/**
+  *  Delete Form page function. 
+  */
+function my_database_form() {
+  $form = array();
+  $form['number'] = array(
+    '#type' => 'hidden',
+    '#title' => t('Number'),
+    '#required' => true,
+    '#value' => $_GET['act'],
+  );
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Submit'),
+    '#id' => t('sok'),
+  );    
+  $form['Cancel'] = array(
+    '#type' => 'submit',
+    '#value' => t('Cancel'),
+    '#id' => t('sca'),
+  );  
+  $form['#submit'][] = 'my_database_form_submit';
+  return $form;
+}
+
+/**
+  * show db_select page. 
+*/
+function my_database_showselect(){
+  $header = array(
+    array('data' => t('id')),
+    array('data' => t('number')),
+    array('data' => t('teaser')),
+    array('data' => t('text')),
+    array('data' => t('actions')),
+  );
+  $rows = array();
+  $q = db_select('custom_table','t');
+  $q->fields('t', array('id', 'number', 'teaser', 'text'));
+  $r = $q->execute();
+  while ($res = $r->fetchAssoc()){
+    $rows[] = array(
+      array('data' => t($res['id'])),
+      array('data' => t($res['number'])),
+      array('data' => t($res['teaser'])),
+      array('data' => t($res['text'])),
+      array('data' => t('<a href="/content/stage6?act=' . $res['id'] . '">Edit</a> <a href="/delete?act=' . $res['id'] . '">Delete</a>')),
+    );
+  }
+  return theme('table', array('header' => $header, 'rows'=> $rows));  
+}
+
+/**
+  * form alter for my_database
+  */
+function my_database_form_alter(&$form, &$form_state, $form_id) {
+  if ($form_id == 'webform_client_form_12') {
+    if (isset($_GET['act'])) {
+      $q = db_select('custom_table','t')
+      ->fields('t', array('number', 'teaser', 'text'))
+      ->condition('id', $_GET['act'], '=')
+      ->execute()    
+      ->fetchAssoc();
+      $form['submitted']['number']['#default_value'] = $q['number'];
+      $form['submitted']['teaser']['#default_value'] = $q['teaser'];
+      $form['submitted']['text']['#default_value'] = $q['text'];
+      $form['submitted']['act']['#default_value'] = 'edit';
+      $form['submitted']['id']['#default_value'] = $_GET['act'];
+    }
+    $form['#submit'][] = 'my_database_webform_submit';
+  }
+}
+
+/**
+  * submit for web form
+  */
+function my_database_form_submit($form, &$form_state) {
+  if ($form_state['clicked_button']['#id'] == 'sok') {
+    $q = db_delete('custom_table')
+    ->condition('id',$form_state['values']['number'])
+    ->execute();
+    $form_state['redirect'] = 'showselect';
+  }
+  elseif ($form_state['clicked_button']['#id'] == 'sca') {
+    $form_state['redirect'] = 'showselect';
+  }
+}
+
+/**
+  * submit for web form
+  */
+function my_database_webform_submit($form, &$form_state) {
+  switch($form_state['values']['submitted'][4]){
+    case 'edit':
+      $q = db_update('custom_table')
+      ->fields(array(
+        'number' => $form_state['values']['submitted'][1],
+        'teaser' => $form_state['values']['submitted'][2],
+        'text' => $form_state['values']['submitted'][3],
+      ))
+      ->condition('id',$form_state['values']['submitted'][5])
+      ->execute();
+      $form_state['redirect'] = 'showselect';
+      break;
+    case 'ins':
+      $q = db_insert('custom_table')
+      ->fields(array(
+        'number' => $form_state['values']['submitted'][1],
+        'teaser' => $form_state['values']['submitted'][2],
+        'text' => $form_state['values']['submitted'][3],
+      ))
+      ->execute();
+      drupal_set_message('Data successfuly saved to db');
+      $form_state['redirect'] = 'showselect';
+      break;
+  }
+}

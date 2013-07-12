@@ -1,0 +1,1 @@
+DatabaseSchemaObjectExistsException: Table <em class="placeholder">custom_table</em> already exists. in DatabaseSchema->createTable() (line 657 of /home/magic/www1/includes/database/schema.inc).

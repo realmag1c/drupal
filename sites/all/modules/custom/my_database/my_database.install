@@ -1,0 +1,62 @@
+<?php
+/**
+ * @file
+ *   my_database module install/schema hooks.
+ */
+
+
+
+/**
+ * Implements hook_schema().
+ */
+function my_database_schema() {
+  $schema = array();
+  $schema['custom_table'] = array(
+    'description' => t('custom table description'),
+    'fields' => array(
+      'id' => array(
+        'description' => t('primary key'),
+        'type' => 'serial',
+        'unsigned' => true,
+        'not null' => true,
+      ),
+      'number' => array(
+        'description' => t('integer'),
+        'type' => 'int',
+        'not null' => true,
+      ),
+      'teaser' => array(
+        'description' => t('teaser'),
+        'type' => 'varchar',
+        'length' => 150,
+        'not null' => true,
+      ),
+      'text' => array(
+        'description' => t('text'),
+        'type' => 'text',
+        'not null' => true,
+      ),
+    ),
+    'primary key' => array('id'),
+  );
+  return $schema;
+}
+
+
+  
+/**
+ * Implements hook_install().
+ */
+function my_database_install() {
+  drupal_install_schema('my_database');
+}
+
+
+
+/**
+ * Implements hook_uninstall().
+ */
+function my_database_uninstall() {
+  drupal_uninstall_schema('my_database');	
+}
+

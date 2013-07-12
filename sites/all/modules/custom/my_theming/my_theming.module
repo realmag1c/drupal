@@ -1,0 +1,197 @@
+<?php
+ /**
+  * @file
+  * Build page and form for calculator.
+  */
+
+
+/**
+  * Implements hook_menu(). 
+*/
+  
+function my_theming_menu() {
+  $items = array();
+  $items['my-theming'] = array(
+    'title' => 'Theming test',
+    'page callback' => 'theming',
+    'access callback' => TRUE,
+  );
+  return $items;
+}
+
+
+/**
+  * output function for my-theming page 
+*/
+function theming() {
+  $title = t('My List');
+  $type = 'ul';
+  $attributes = array(
+    'id' => 'test-list',
+    'class' => 'test class',
+  );
+  $items = array(
+    '0' => array(
+      'data' => 'Item 1',
+      'id' => 'item_1',
+      'class' => array('item-1')
+    ),
+    '1' => array(
+      'data' => 'Item 2',
+      'id' => 'item_2',
+      'class' => array('item-2'),
+      'children' => array(
+        '0' => array(
+          'data' => 'Sub Item 1',
+          'id' => 'sub_1',
+          'class' => array('sub-item-1')
+        ),
+        '1' => array (
+          'data' => 'Sub Item 2',
+          'id' => 'sub_2',
+          'class' => array('sub-item-2')
+        ),
+      ),
+    ),
+    '2' => array (
+      'data' => 'Item 3',
+      'id' => 'item_3',
+      'class' => array('item-3')
+    ),
+  );
+
+  $nodes = node_load_multiple(array(), array('type' => 'movies'));
+  $c = theme_item_list(array('items' => $items, 'title' => $title,'type' => $type, 'attributes' => $attributes)).'<br><br>';
+
+//fieldset
+  $a = array(
+    '#title'       => t('Test table'),
+    '#children'    => t('test table child text.'),
+    '#collapsible' => true,
+    '#collapsed'   => true,
+    '#attributes'  => array(
+      'class' => array('collapsible', 'collapsed')
+    )
+  );
+  $c .= theme('fieldset', array('element' => $a)) . '<br><br>';
+
+//table  
+  $c .= table() . '<br><br>';
+
+  $url = '1.jpg';
+  $c .= theme('image_style', array('style_name' => 'thumbnail', 'path' => $url)) . '</div><br><br>';
+
+//  $c .= theme('tfunction','11111111111111111222222222222222222<br><br>');
+
+  $c .= theme('tfun',array('text' => '33333333333333333344444444444444444<br><br>'));
+  return $c;
+}
+
+
+
+/**
+  * table theming. 
+*/
+function table() { 
+  $header = array(
+    array('data' => t('col1')),  
+    array('data' => t('col2')),  
+    array('data' => t('col3'))  
+  );
+  $rows[] = array(
+    array('data' => t('Row 1 – Cell 1')), 
+    array('data' => t('Row 1 – Cell 2')), 
+    array('data' => t('Row 1 – Cell 3'))  
+  );
+  $rows[] = array( 
+    array('data' => t('Row 2 – Cell 1')), 
+    array('data' => t('Row 2 – Cell 2')),
+    array('data' => t('Row 2 – Cell 3'))
+  );
+  return theme('table', array('header' => $header, 'rows'=> $rows));
+}
+
+
+/**
+  * theming with tpl.php
+*/
+function my_theming_theme(){
+  return array(
+    'tfun' => array(
+    'template' => 'mytest',
+    'arguments' => array('form' => NULL),
+    )
+  );
+}
+
+
+
+/**
+  * theming with function
+*/
+function theme_tfunction($el){
+  $class= '';
+  $output = '<h2><strong>' . $el . '</strong></h2>';
+  return $output;
+}
+
+
+/**
+  * preprocess_views_view
+*/
+function my_theming_preprocess_views_view(&$vars) {
+  switch($vars['view']->name) {
+    case 'recense_list' :
+      $vars['view']->human_name = t($vars['view']->human_name . ' with preprocess_views_view');
+  }
+}
+
+
+/**
+  * preprocess_views_view_field
+*/
+function my_theming_preprocess_views_view_field(&$vars) {
+  switch ($vars['view']->name) {
+    case 'recense_list' :
+      if ($vars['field']->options['id'] == 'body') {
+        $vars['output'] = t('with preprocess_views_view_field added strong tag <b>' . $vars['output'] . '</b>');
+      }
+  }
+}
+ 
+/**
+  * preprocess_views_view_field
+*/
+/*
+function my_theming_preprocess_views_view_field(&$vars) {
+  switch ($vars['view']->name) {
+    case 'recense_list' :
+      if ($vars['field']->options['id'] == 'body') {
+        $vars['output'] = t('with preprocess_views_view_field added strong tag <b>' . $vars['output'] . '</b>');
+      }
+  }
+}
+*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

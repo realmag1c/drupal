@@ -1,0 +1,4 @@
+name = my_theming
+description = my_theming module stage 4
+version = 7.x-1.x-dev
+core = 7.x

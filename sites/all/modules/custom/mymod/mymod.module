@@ -1,0 +1,299 @@
+<?php
+ /**
+  * @file
+  * mymod module
+  */
+
+
+/**
+  * Implements hook_menu(). 
+  */
+function mymod_menu() {
+  $items = array();
+  $items['mymod-page'] = array(
+    'title' => 'Good page',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('mymod_page_form'),
+    'access callback' => TRUE,
+  );
+  $items['p403'] = array(
+    'title' => '403',
+    'page callback' => 'p4031',
+    'access callback' => TRUE,
+  );
+  $items['p404'] = array(
+    'title' => '404',
+    'page callback' => 'p4041',
+    'access callback' => TRUE,
+  );  
+  $items['contacts'] = array(
+    'title' => 'Contacts',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('mymod_contacts_form'),
+    'access callback' => TRUE,
+  );  
+   return $items;
+  }
+
+/**
+  * Contacts page(). 
+  */
+function mymod_contacts_form() {
+  $form = array();
+  $form['name'] = array(
+    '#type' => 'textfield',
+    '#title' => t('First Name'),
+    '#required' => true,
+  );
+  $form['lname'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Last Name'),
+  );  
+  $form['nick'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Nickname'),
+    '#required' => true,
+  );
+  $form['email'] = array(
+    '#type' => 'textfield',
+    '#title' => t('e-mail'),
+    '#required' => true,
+  );  
+  $form['tel'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Phone (xxx-xxx-xxxx)'),
+  );    
+  $reg = array('Ukraine', 'Russia', 'USA');
+  $form['reg'] = array(
+    '#type' => 'select',
+    '#title' => t('Choose your country'),
+    '#options' => $reg,
+    '#required' => true,
+  );    
+  $form['text'] = array(
+    '#type' => 'textarea',
+    '#title' => t('Type your message'),
+    '#required' => true,
+  );    
+  return $form;
+}
+
+/**
+  * Implements hook_form_alter
+  */
+function mymod_form_alter(&$form, &$form_state, $form_id) {
+  $q[] = 'gondii, the protozoan parasite found in cats everywhere that may or may not be controlling your brain at this very instant, is out to get the children';
+  $q[] = 'Ballsy farmer digs a fire line in his hay field.';
+  $q[] = 'Rocket carrying GLONASS navigation satellites crashed 32 seconds after launch.';
+  $q[] = '1 second of footage turns into 3 minutes of video';
+  $q[] = 'The greatest challenge to firefighters may not be the trees or the tinder, which have always been there, but the people.';
+  $q[] = 'It was exactly midnight when Caroline Burns eerily opened her eyes and looked at the operating lights above her';
+  $rn = rand(0, count($q) - 1);
+
+  $nodes = node_load_multiple(array(), array('type' => 'Recense'));
+  $op = array();
+  foreach($nodes as $no) {
+    $op[] = $no->title;
+  }
+// custom form
+  if ($form_id == 'mymod_contacts_form') {
+    $form['#submit'][] = 'mymod_redirect_form';
+    $form['rec'] = array(
+      '#type' => 'radios',
+      '#title' => t('Choose recense'),
+      '#options' => $op,
+      '#required' => true,
+    );
+    $form['rul'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Accept rules'),
+      '#required' => true,
+    );  
+    $form['submit'] = array(
+      '#type' => 'submit',
+      '#value' => t('Submit'),
+    );  
+    $form['pre'] = array(
+      '#prefix' => t($q[$rn]),
+      '#weight' => -1,
+    );      
+    $rn = rand(0, count($q) - 1);
+    $form['random'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Random text'),
+      '#description' => t($q[$rn]),
+      '#collapsed' => true,
+      '#collapsible' => true,
+    );
+  }
+// webform  
+  if ($form_id == 'webform_client_form_11') {
+    $form['rec'] = array(
+      '#type' => 'radios',
+      '#title' => t('Choose recense'),
+      '#options' => $op,
+      '#required' => true,
+    );
+    $form['rul'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Accept rules'),
+      '#required' => true,
+    );  
+
+    $form['pre'] = array(
+      '#prefix' => t($q[$rn]),
+      '#weight' => -1000,
+    );      
+    
+    $rn = rand(0, count($q) - 1);
+    $form['random'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Random text'),
+      '#description' => t($q[$rn]),
+      '#collapsed' => true,
+      '#collapsible' => true,
+    );
+  }
+}
+
+/**
+  * Submit function for mymod_contacts_form
+  */
+function mymod_redirect_form($form, &$form_state) {
+  $form_state['redirect'] = 'node/11/done?sid=2';
+}
+
+/**
+  * Validate mymod_contacts_form
+  */
+function mymod_contacts_form_validate($form, &$form_state) {
+  if (!preg_match("/[-a-zA-Z0-9_]{3,20}@[-a-zA-Z0-9]{2,64}\.[a-zA-Z\.]{2,9}/", $form_state['values']['email'])) {
+    form_set_error('email', t('Enter correct email'));
+  }
+  if ($form_state['values']['tel'] !== '') {
+    if (!preg_match("/^[0-9]{12,13}$/", $form_state['values']['tel'])) {
+      form_set_error('tel', t('Enter phone in format xxxxxxxxxxxx 12-13 digits'));
+    }
+  }
+}
+
+/**
+  * Validate mymod_contacts_webform
+  */
+function mymod_contacts_webform_validate($form, &$form_state) {
+  if (!preg_match("/[-a-zA-Z0-9_]{3,20}@[-a-zA-Z0-9]{2,64}\.[a-zA-Z\.]{2,9}/", $form_state['values']['submitted']['email'])) {
+    form_set_error('email', t('Enter correct email'));
+  }
+  if ($form_state['values']['submitted']['tel'] !== '') {
+    if (!preg_match("/^[0-9]{12,13}$/", $form_state['values']['submitted']['tel'])) {
+      form_set_error('tel', t('Enter phone in format xxxxxxxxxxxx 12-13 digits'));
+    }
+  }
+}
+
+/**
+  * output function for 403 page
+  */
+function p4031() {
+  $c = 'this is 403 page';
+ return $c;
+}
+
+/**
+  * output function for 404 page
+  */
+function p4041() {
+  $c = 'this is 404 page';
+  return $c;
+}
+
+function mymod_page_form($form, $form_state) {
+  $form = array();
+  return $form;
+}
+
+function mymod_permission() {
+  return array('permtest' => array(
+    'title' => t('myb permission'),
+    'description' => t('access to view myb myblock'),
+  ));
+}
+
+function mymod_block_info() {
+  $blocks = array();
+  $blocks['myb']['info'] = 'My block';
+  $blocks['myb']['access arguments'] = array('permtest');
+  return $blocks;
+}
+
+function mymod_init() {
+  global $msg;
+  $msg = 'check footer box from hook_init!';
+}
+
+function mymod_block_view($delta = '') {
+  global $msg;
+  $block = array();
+  switch($delta) {
+    case 'myb':
+      $block['subject'] = t('delta myb block');
+      if (user_access('permtest')) {
+        $block['content'] = t($msg);
+      }
+      else {
+        $block['content'] = t('access to view this content is denied');
+      }
+  }
+  return $block;
+}
+
+function mymod_node_view($node, $view_mode, $langcode) {
+  if ($view_mode == 'full') {
+    $node->content['mycontent'] = array(
+      '#markup' => 'Test node content from hook_node_view in mymod.', 
+      '#weight' => 10, 
+    );
+  }
+}
+
+function mymod_node_access($node, $op, $account) {
+  $type = $node->type;
+  if ($type == 'movies' && $op == 'insert' && $account->uid == 2) {
+    return NODE_ACCESS_DENY;
+  }
+}
+
+function mymod_user_view($account, $view_mode, $langcode) {
+  if (user_access('permtest')) {
+    $account->content['summary']['blog'] = array(
+      '#type' => 'user_profile_item',
+      '#title' => t('Blog'),
+      '#markup' => l(t('View recent blog entries thx for hook_user_view'), "blog/$account->uid", array('attributes' => array('title' => t("Read !username's latest blog entries.", array('!username' => format_username($account)))))),
+      '#attributes' => array('class' => array('blog')),
+    );
+  }
+}
+
+function mymod_node_insert($node) {
+  drupal_set_message('adding the node to db');
+}
+
+function mymod_node_update($node) {
+  drupal_set_message('updating the node in db');
+}
+
+function mymod_node_delete($node) {
+  drupal_set_message('deleting the node from db');
+}
+
+function mymod_user_insert($node) {
+  drupal_set_message('creating user in db');
+}
+
+function mymod_user_update($node) {
+  drupal_set_message('updating user in db');
+}
+
+function mymod_user_delete($node) {
+  drupal_set_message('deleting user from db');
+}
